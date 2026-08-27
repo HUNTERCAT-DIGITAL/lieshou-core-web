@@ -1,0 +1,26 @@
+# —— 依赖 ——
+node_modules/
+.pnpm-store/
+
+# —— 构建产物 ——
+dist/
+build/
+*.tsbuildinfo
+*.tsbuildinfo.*
+coverage/
+
+# —— CI 临时 workspace（模拟消费方挂载生成） ——
+pnpm-workspace.yaml.tmp
+.ci-tmp/
+
+# —— 环境/日志 ——
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# —— 编辑器 ——
+.idea/
+.vscode/*
+!.vscode/extensions.json
