@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  # —— 类型检查 + 依赖契约验证 ——
+  # —— 类型检查（模拟消费方 workspace：clone 共享仓 + 临时 workspace）——
   check:
     runs-on: self-hosted
     steps:
@@ -15,10 +15,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: pnpm
       - name: Setup pnpm
         run: corepack enable && corepack prepare pnpm@9.12.0 --activate
-      - name: 安装依赖
-        run: pnpm install --no-frozen-lockfile --force
+      - name: 模拟消费方 workspace（clone 共享仓）
+        run: |
+          mkdir -p open
+          for u in contract-api contract-types contract-config ui; do
+            git clone --depth 1 https://github.com/HUNTERCAT-DIGITAL/lieshou-$u.git open/$u 2>/dev/null
+          done
+          printf 'packages:\n  - "."\n  - "open/*"\n' > pnpm-workspace.yaml
+      - name: 安装依赖（workspace 解析）
+        run: pnpm install --no-frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
