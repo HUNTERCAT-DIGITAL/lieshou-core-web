@@ -10,7 +10,8 @@
     "jsx": "react-jsx",
     "paths": {
       "@lieshoucloud/contract-api": ["../lieshou-contract-api/src"],
-      "@lieshoucloud/contract-types": ["../lieshou-contract-types/src"]
+      "@lieshoucloud/contract-types": ["../lieshou-contract-types/src"],
+      "@lieshoucloud/contract-types/*": ["../lieshou-contract-types/src/*"]
     }
   },
   "include": ["src"]
