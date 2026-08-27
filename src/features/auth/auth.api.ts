@@ -1,24 +1,35 @@
-/** 认证 API（经 contract-api 传输层 · 契约来自 contract-types） */
-import type { TokenResponse } from '@lieshoucloud/contract-types';
-import { getAdapters } from '../../config/provider';
+/** 认证 API（经注入的传输端口 · 契约来自 contract-types） */
+import { requestApi } from '../../config/provider';
+import type { CurrentUser, LoginRequest, TokenResponse } from '@lieshoucloud/contract-types/business/auth';
 
-export interface LoginParams {
-  tenantCode: string;
-  username: string;
-  password: string;
-}
-
-/** 登录：调后端认证端点（HTTP 传输由 contract-api 提供，此处仅定义业务流程） */
-export async function login(params: LoginParams): Promise<TokenResponse> {
-  const { storage } = getAdapters();
-  const res = await fetch('/api/auth/login', {
+/** 登录 */
+export async function login(req: LoginRequest): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
+    body: JSON.stringify(req),
   });
-  if (!res.ok) throw new Error(`登录失败 HTTP ${res.status}`);
-  const token = (await res.json()) as TokenResponse;
-  storage.set('access_token', token.accessToken);
-  storage.set('refresh_token', token.refreshToken);
-  return token;
+}
+
+/** 刷新 token */
+export async function refreshTokens(refreshToken: string): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+}
+
+/** 当前用户（401 由传输层拦截自动 refresh） */
+export async function fetchCurrentUser(): Promise<CurrentUser> {
+  return requestApi<CurrentUser>('/api/auth/me');
+}
+
+/** 切换租户 */
+export async function switchTenant(refreshToken: string, tenantCode: string): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/switch-tenant', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken, tenantCode }),
+  });
 }

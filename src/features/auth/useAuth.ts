@@ -1,43 +1,32 @@
 /** 认证 hooks（核心层单点 · 4 端复用） */
 import { useCallback } from 'react';
 import { getAdapters } from '../../config/provider';
-import { login as loginApi, type LoginParams } from './auth.api';
 import { useAuthStore } from './auth.store';
 
-export function useAuth() {
-  const session = useAuthStore((s) => s.session);
-  const setSession = useAuthStore((s) => s.setSession);
-  const clear = useAuthStore((s) => s.clear);
+export interface UseAuth {
+  isAuthenticated: boolean;
+  user: typeof useAuthStore extends infer _ ? import('@lieshoucloud/contract-types/business/auth').CurrentUser | null : never;
+  accessToken: string | null;
+  login: (username: string, password: string, tenantCode?: string) => Promise<void>;
+  logout: () => void;
+  fetchMe: () => Promise<import('@lieshoucloud/contract-types/business/auth').CurrentUser>;
+  switchTenant: (tenantCode: string) => Promise<void>;
+}
 
-  const login = useCallback(
-    async (params: LoginParams) => {
-      const { navigation, notifier } = getAdapters();
-      try {
-        const token = await loginApi(params);
-        setSession({
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
-          userId: token.userId,
-          username: token.username ?? null,
-          tenantCode: token.tenantCode ?? null,
-          tenantName: token.tenantName ?? null,
-        });
-        notifier.success(`欢迎，${token.username}`);
-        navigation.replace('/');
-      } catch (e) {
-        notifier.error(e instanceof Error ? e.message : '登录失败');
-      }
-    },
-    [setSession],
-  );
+export function useAuth(): UseAuth {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const login = useAuthStore((s) => s.login);
+  const logout = useAuthStore((s) => s.logout);
+  const fetchMe = useAuthStore((s) => s.fetchMe);
+  const switchTenant = useAuthStore((s) => s.switchTenant);
 
-  const logout = useCallback(() => {
-    const { storage, navigation } = getAdapters();
-    storage.remove('access_token');
-    storage.remove('refresh_token');
-    clear();
+  const handleLogout = useCallback(() => {
+    const { navigation } = getAdapters();
+    logout();
     navigation.replace('/login');
-  }, [clear]);
+  }, [logout]);
 
-  return { session, login, logout, isAuthenticated: Boolean(session.accessToken) };
+  return { isAuthenticated, user, accessToken, login, logout: handleLogout, fetchMe, switchTenant };
 }
