@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getAdapters } from '../../config/provider';
 import type { CurrentUser, TenantOption, TokenResponse } from '@lieshoucloud/contract-types/business/auth';
+import { AuthError } from '@lieshoucloud/contract-api';
 import { fetchCurrentUser, login as loginApi, refreshTokens, switchTenant as switchTenantApi } from './auth.api';
 
 export interface Session {
@@ -60,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
 
       refresh: async () => {
         const refreshToken = get().refreshToken;
-        if (!refreshToken) throw new Error('NO_REFRESH_TOKEN');
+        if (!refreshToken) throw new AuthError('NO_REFRESH_TOKEN', 'not logged in');
         const token = await refreshTokens(refreshToken);
         set({ accessToken: token.accessToken, refreshToken: token.refreshToken });
       },
@@ -99,7 +100,7 @@ export const useAuthStore = create<AuthState>()(
 
       switchTenant: async (tenantCode) => {
         const refreshToken = get().refreshToken;
-        if (!refreshToken) throw new Error('NO_REFRESH_TOKEN');
+        if (!refreshToken) throw new AuthError('NO_REFRESH_TOKEN', 'not logged in');
         const token = await switchTenantApi(refreshToken, tenantCode);
         set({
           accessToken: token.accessToken,

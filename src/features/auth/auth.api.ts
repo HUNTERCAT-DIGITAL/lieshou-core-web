@@ -19,7 +19,8 @@ export async function login(req: LoginRequest): Promise<TokenResponse> {
 
 /** 刷新 token */
 export async function refreshTokens(refreshToken: string): Promise<TokenResponse> {
-  return requestApi<TokenResponse>('/api/auth/refresh', {
+  try {
+    return await requestApi<TokenResponse>('/api/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
