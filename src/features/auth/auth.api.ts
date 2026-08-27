@@ -6,10 +6,13 @@ import type { CurrentUser, LoginRequest, TokenResponse } from '@lieshoucloud/con
 /** 登录 */
 export async function login(req: LoginRequest): Promise<TokenResponse> {
   try {
+    // skipAuth401: 登录 401 = 密码错误,不走会话过期拦截(由各端 ApiPort 透传到 contract-api)
     return await requestApi<TokenResponse>('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
+      // @ts-expect-error core-web 不直接依赖 contract-api 的 RequestInit 扩展,由各端 ApiPort 透传
+      skipAuth401: true,
     });
   } catch (e) {
     if (e instanceof AuthError) throw e;
