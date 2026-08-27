@@ -1,14 +1,20 @@
 /** 认证 API（经注入的传输端口 · 契约来自 contract-types） */
 import { requestApi } from '../../config/provider';
+import { AuthError } from '@lieshoucloud/contract-api';
 import type { CurrentUser, LoginRequest, TokenResponse } from '@lieshoucloud/contract-types/business/auth';
 
 /** 登录 */
 export async function login(req: LoginRequest): Promise<TokenResponse> {
-  return requestApi<TokenResponse>('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(req),
-  });
+  try {
+    return await requestApi<TokenResponse>('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+  } catch (e) {
+    if (e instanceof AuthError) throw e;
+    throw new AuthError('INVALID_CREDENTIALS', e instanceof Error ? e.message : String(e));
+  }
 }
 
 /** 刷新 token */
