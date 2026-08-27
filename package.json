@@ -1,0 +1,24 @@
+{
+  "name": "@lieshoucloud/core-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "猎手云前端核心层（开源·业务逻辑唯一源）：认证/工作台/审批通用 hooks + zustand 状态 · 端口-适配器（各端注入存储/通知/导航）",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@lieshoucloud/contract-api": "workspace:*",
+    "@lieshoucloud/contract-types": "workspace:*",
+    "zustand": "^4.5.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
