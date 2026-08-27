@@ -12,17 +12,33 @@ export interface CoreAdapters {
   api?: ApiPort;
 }
 
+/** 默认适配器（测试/SSR 场景不崩；生产各端 configureCore 覆盖） */
+const defaultAdapters: CoreAdapters = {
+  storage: {
+    get: (k) => (typeof localStorage !== 'undefined' ? localStorage.getItem(k) : null),
+    set: (k, v) => typeof localStorage !== 'undefined' && localStorage.setItem(k, v),
+    remove: (k) => typeof localStorage !== 'undefined' && localStorage.removeItem(k),
+  },
+  notifier: {
+    success: () => {},
+    error: (m) => typeof console !== 'undefined' && console.error(m),
+  },
+  navigation: {
+    to: () => {},
+    replace: () => {},
+  },
+};
+
 let adapters: CoreAdapters | null = null;
 
-/** 各端启动时调用一次：注入端口实现 */
+/** 各端启动时调用一次：注入端口实现（覆盖默认） */
 export function configureCore(impl: CoreAdapters): void {
-  adapters = impl;
+  adapters = { ...defaultAdapters, ...impl };
 }
 
-/** 核心层内部获取适配器（未配置时抛错，强制各端装配） */
+/** 核心层内部获取适配器（未配置时用默认） */
 export function getAdapters(): CoreAdapters {
-  if (!adapters) throw new Error('core-web 未配置：请先调用 configureCore()');
-  return adapters;
+  return adapters ?? defaultAdapters;
 }
 
 /** 获取 HTTP 传输：优先注入的 api 端口，缺省裸 fetch */
