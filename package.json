@@ -8,10 +8,10 @@
   "dependencies": {
     "@lieshoucloud/contract-api": "workspace:*",
     "@lieshoucloud/contract-types": "workspace:*",
-    "zustand": "^4.5.0"
+    "zustand": "^5.0.0"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": ">=18"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
