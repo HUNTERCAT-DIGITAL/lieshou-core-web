@@ -14,7 +14,8 @@ export type { StoragePort } from './ports/storage.port';
 export type { NotifierPort } from './ports/notifier.port';
 export type { NavigationPort } from './ports/navigation.port';
 
-export { useAuth, type LoginParams } from './features/auth/useAuth';
+export { useAuth } from './features/auth/useAuth';
+export type { LoginParams } from './features/auth/auth.api';
 export { useAuthStore, type Session } from './features/auth/auth.store';
 export { useWorkbench, type WorkbenchItem, type WorkbenchOptions } from './features/workbench/useWorkbench';
 export { useApproval, type ApprovalAction, type ApprovalStatus } from './features/approval/useApproval';

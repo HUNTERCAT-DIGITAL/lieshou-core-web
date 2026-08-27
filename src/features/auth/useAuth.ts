@@ -18,9 +18,9 @@ export function useAuth() {
           accessToken: token.accessToken,
           refreshToken: token.refreshToken,
           userId: token.userId,
-          username: token.username,
-          tenantCode: token.tenantCode,
-          tenantName: token.tenantName,
+          username: token.username ?? null,
+          tenantCode: token.tenantCode ?? null,
+          tenantName: token.tenantName ?? null,
         });
         notifier.success(`欢迎，${token.username}`);
         navigation.replace('/');

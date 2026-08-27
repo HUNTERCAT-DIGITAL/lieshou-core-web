@@ -7,7 +7,7 @@ export interface WorkbenchItem {
   path: string;
 }
 
-interface WorkbenchOptions {
+export interface WorkbenchOptions {
   /** 行业/客户 Edition 声明的能力 id（如 legal/cases） */
   capabilities?: string[];
   /** 全部可用菜单（由各端注入/import） */
