@@ -21,10 +21,14 @@ export async function login(req: LoginRequest): Promise<TokenResponse> {
 export async function refreshTokens(refreshToken: string): Promise<TokenResponse> {
   try {
     return await requestApi<TokenResponse>('/api/auth/refresh', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  });
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+  } catch (e) {
+    if (e instanceof AuthError) throw e;
+    throw new AuthError('INVALID_REFRESH_TOKEN', e instanceof Error ? e.message : String(e));
+  }
 }
 
 /** 当前用户（401 由传输层拦截自动 refresh） */
