@@ -27,6 +27,7 @@ function toUser(token: TokenResponse): CurrentUser {
   return {
     userId: token.userId,
     username: token.username,
+    // token 不含 roles/permissions：此处仅为登录瞬时占位，真实角色由 login/setSession 后的 fetchMe 同步覆盖
     roles: ['USER'],
     tenantCode: token.tenantCode,
     tenantName: token.tenantName,
@@ -52,10 +53,12 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           availableTenants: token.availableTenants ?? [],
         });
-        get()
+        // 同步拉取真实 roles/permissions（token 不含角色信息）
+        await get()
           .fetchMe()
-          .catch(() => {
-            /* 异步拿真实 roles */
+          .catch((e) => {
+            // 登录已成功，不阻断；保留占位 user，告警便于排查
+            console.warn('[core-web] fetchMe after login failed:', e);
           });
       },
 
@@ -80,15 +83,16 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           availableTenants: token.availableTenants ?? [],
         });
+        // 同上：同步覆盖占位 roles
         get()
           .fetchMe()
-          .catch(() => {});
+          .catch((e) => console.warn('[core-web] fetchMe after setSession failed:', e));
       },
 
       logout: () => {
-        const { storage } = getAdapters();
-        storage.remove('access_token');
-        storage.remove('refresh_token');
+        // 先复位内存状态（会触发 persist 写盘），最后再清持久化——确保 clearStorage 之后无后续 set 写回，
+        // storage 中不残留任何会话数据。旧实现误删不存在的 'access_token'/'refresh_token'，
+        // 刷新页面 persist rehydrate 后会话复活。
         set({
           accessToken: null,
           refreshToken: null,
@@ -96,6 +100,7 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           availableTenants: [],
         });
+        useAuthStore.persist.clearStorage();
       },
 
       switchTenant: async (tenantCode) => {
@@ -107,6 +112,10 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: token.refreshToken,
           availableTenants: token.availableTenants ?? [],
         });
+        // 切换租户后同步拉取新租户下的用户信息（tenantCode/tenantName/roles 可能变化）
+        await get()
+          .fetchMe()
+          .catch((e) => console.warn('[core-web] fetchMe after switchTenant failed:', e));
       },
     }),
     {
