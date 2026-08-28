@@ -86,7 +86,7 @@ export async function loginWithCode(
   });
 }
 
-/** POST /api/auth/register - 注册（注册即登录）；inviteCode 可选（自动入租户） */
+/** POST /api/auth/register - 注册（注册即登录）；code 可选（后端验证码可选 · 开放注册）；inviteCode 可选（自动入租户） */
 export async function register(req: {
   tenantCode?: string;
   username: string;
@@ -94,7 +94,7 @@ export async function register(req: {
   password: string;
   channel: CodeChannel;
   target: string;
-  code: string;
+  code?: string;
   inviteCode?: string;
 }): Promise<TokenResponse> {
   return requestApi<TokenResponse>('/api/auth/register', {
