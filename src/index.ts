@@ -20,3 +20,6 @@ export * from './features/approval/approval.api';
 export * from './features/approval/useApproval';
 export * from './features/contact/contact.api';
 export * from './features/contract/contract.api';
+export * from './features/member/member.api';
+export * from './features/quality/quality.api';
+export * from './features/supply/supply.api';
