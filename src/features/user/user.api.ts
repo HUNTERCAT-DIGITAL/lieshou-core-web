@@ -52,3 +52,12 @@ export async function updateUser(id: number, body: UpdateUserRequest): Promise<U
 export async function deleteUser(id: number): Promise<void> {
   return requestApi<void>(`/api/users/${id}`, { method: 'DELETE' });
 }
+
+/** PUT /api/users/me/password — 自助修改密码（校验原密码，framework 业务源） */
+export async function changeMyPassword(oldPassword: string, newPassword: string): Promise<void> {
+  return requestApi<void>('/api/users/me/password', {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ oldPassword, newPassword }),
+  });
+}
