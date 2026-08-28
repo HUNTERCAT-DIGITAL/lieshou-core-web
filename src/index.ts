@@ -38,3 +38,6 @@ export * from './features/notification/notification.api';
 export * from './features/menu/menu.api';
 export * from './features/file/file.api';
 export * from './features/case/case.api';
+export * from './features/inventory/inventory';
+export * from './features/theme/theme.store';
+export * from './features/theme/useThemeMode';
