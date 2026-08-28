@@ -23,3 +23,7 @@ export * from './features/contract/contract.api';
 export * from './features/member/member.api';
 export * from './features/quality/quality.api';
 export * from './features/supply/supply.api';
+export * from './features/audit/audit.api';
+export * from './features/role/role.api';
+export * from './features/tenant/tenant.api';
+export * from './features/user/user.api';
