@@ -49,3 +49,137 @@ export async function switchTenant(refreshToken: string, tenantCode: string): Pr
     body: JSON.stringify({ refreshToken, tenantCode }),
   });
 }
+
+// ============================================================
+// 验证码 / 注册 / 重置密码 / 可信身份 OAuth（Phase 8 · 从 admin-web services/auth.ts 上收）
+// ============================================================
+
+export type CodeChannel = 'SMS' | 'EMAIL';
+export type CodePurpose = 'LOGIN' | 'REGISTER' | 'RESET_PASSWORD';
+
+/** POST /api/auth/send-code */
+export async function sendCode(
+  channel: CodeChannel,
+  target: string,
+  purpose: CodePurpose,
+): Promise<void> {
+  return requestApi<void>('/api/auth/send-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel, target, purpose }),
+  });
+}
+
+/** POST /api/auth/login/code - 验证码登录 */
+export async function loginWithCode(
+  tenantCode: string | undefined,
+  channel: CodeChannel,
+  target: string,
+  code: string,
+): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/login/code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tenantCode, channel, target, code }),
+    // @ts-expect-error core-web 不直接依赖 contract-api 的 RequestInit 扩展,由各端 ApiPort 透传
+    skipAuth401: true,
+  });
+}
+
+/** POST /api/auth/register - 注册（注册即登录）；inviteCode 可选（自动入租户） */
+export async function register(req: {
+  tenantCode?: string;
+  username: string;
+  displayName: string;
+  password: string;
+  channel: CodeChannel;
+  target: string;
+  code: string;
+  inviteCode?: string;
+}): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+    // @ts-expect-error 同上
+    skipAuth401: true,
+  });
+}
+
+/** POST /api/auth/reset-password - 忘记密码 */
+export async function resetPassword(
+  channel: CodeChannel,
+  target: string,
+  code: string,
+  newPassword: string,
+): Promise<void> {
+  return requestApi<void>('/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel, target, code, newPassword }),
+  });
+}
+
+// ---------- 可信身份登录（OAuth 演示通道） ----------
+
+export interface OAuthProvider {
+  provider: string;
+  name: string;
+  hint: string;
+  permissions: string[];
+}
+
+export interface OAuthAuthorizeResult {
+  code: string;
+  state: string;
+  expiresInSeconds: number;
+  memberUsername: string;
+  tenantCode: string;
+  memberStatus: string;
+}
+
+/** OAuth token 响应 = TokenResponse + 可信身份字段 */
+export interface OAuthTokenResult extends TokenResponse {
+  provider: string;
+  memberStatus: string;
+  sessionAt: string;
+}
+
+export interface SecureSession {
+  provider: string;
+  username: string;
+  tenantCode: string;
+  roles: string[];
+  at: string;
+  memberStatus: string;
+}
+
+/** GET /api/auth/oauth/providers - 可信身份通道注册表 */
+export async function oauthProviders(): Promise<OAuthProvider[]> {
+  return requestApi<OAuthProvider[]>('/api/auth/oauth/providers');
+}
+
+/** POST /api/auth/oauth/authorize - 可信身份通道授权（一次性授权码） */
+export async function oauthAuthorize(
+  provider: string,
+  memberUsername: string,
+  tenantCode?: string,
+): Promise<OAuthAuthorizeResult> {
+  return requestApi<OAuthAuthorizeResult>('/api/auth/oauth/authorize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider, memberUsername, tenantCode }),
+  });
+}
+
+/** POST /api/auth/oauth/token - 用授权码换 token（可信身份会话） */
+export async function oauthToken(
+  code: string,
+  tenantCode?: string,
+): Promise<OAuthTokenResult> {
+  return requestApi<OAuthTokenResult>('/api/auth/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, tenantCode }),
+  });
+}

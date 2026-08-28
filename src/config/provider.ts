@@ -42,11 +42,14 @@ export function getAdapters(): CoreAdapters {
 }
 
 /** 获取 HTTP 传输：优先注入的 api 端口，缺省裸 fetch */
-export function requestApi<T>(path: string, init?: RequestInit): Promise<T> {
+export function requestApi<T>(
+  path: string,
+  init?: RequestInit & { asBlob?: boolean },
+): Promise<T> {
   const { api } = getAdapters();
-  if (api) return api.request<T>(path, init);
-  return fetch(path, init).then((res) => {
+  if (api) return api.request<T>(path, init as RequestInit & { asBlob?: boolean });
+  return fetch(path, init).then(async (res) => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json() as Promise<T>;
+    return ((init?.asBlob ? res.blob() : res.json()) as Promise<T>);
   });
 }
