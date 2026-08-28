@@ -1,4 +1,10 @@
-/** 审批流程 hooks（对应后端 framework-approval 状态机：PENDING → APPROVED/REJECTED） */
+/**
+ * 审批流程 hooks（对应后端 framework-approval 状态机：PENDING → APPROVED/REJECTED）.
+ *
+ * 职责边界（2026-09）：核心层负责「状态流转操作 + 结果反馈」，数据获取/列表/发起
+ * 仍在各端 services 层（mobile: src/services/approval.ts）。
+ * ⚠️ 当前 4 端尚未接线（零消费者）；接入时走本 hook + 各端注入的 ApiPort。
+ */
 import { useCallback, useState } from 'react';
 import { getAdapters, requestApi } from '../../config/provider';
 

@@ -1,4 +1,10 @@
-/** 工作台装配 hooks（菜单/能力裁剪 · 对应后端 framework 的能力目录哲学） */
+/**
+ * 工作台装配 hooks（菜单/能力裁剪 · 对应后端 framework 的能力目录哲学）.
+ *
+ * 职责边界（2026-09）：本 hook 是「能力目录裁剪器」（CapabilityDef → 按 edition.capabilities
+ * 过滤），供商业/客户版菜单渲染用。端壳侧「行业 × 角色 × 客户 tab 注入」的完整装配
+ * 在各端 config（mobile: src/config/workbench.ts getWorkbench），两者分层不同、不重复。
+ */
 import { useMemo } from 'react';
 
 export interface WorkbenchItem {
