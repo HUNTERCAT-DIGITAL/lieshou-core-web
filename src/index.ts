@@ -16,4 +16,5 @@ export * from './features/auth/auth.api';
 export * from './features/auth/useAuth';
 export * from './features/auth/auth.store';
 export * from './features/workbench/useWorkbench';
+export * from './features/approval/approval.api';
 export * from './features/approval/useApproval';
