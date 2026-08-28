@@ -120,6 +120,12 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'lieshoucloud:auth',
+      // 各端在 configureCore 注入 storage 端口后显式 rehydrate（见各端入口：
+      // admin-web/desktop main.tsx、mobile _layout.tsx、mini-program app.tsx）。
+      // 原因：store 在 core-web 模块加载时创建，早于各端 configureCore ——
+      // 若默认同步 rehydrate，会落到 defaultAdapters（localStorage），
+      // RN 端（无 localStorage）将读不到任何持久化会话。
+      skipHydration: true,
       storage: {
         getItem: (name) => {
           const v = getAdapters().storage.get(name);
