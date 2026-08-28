@@ -1,6 +1,6 @@
 /** 审批流程 hooks（对应后端 framework-approval 状态机：PENDING → APPROVED/REJECTED） */
 import { useCallback, useState } from 'react';
-import { getAdapters } from '../../config/provider';
+import { getAdapters, requestApi } from '../../config/provider';
 
 export type ApprovalAction = 'approve' | 'reject';
 export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -11,7 +11,11 @@ export interface ApprovalSummary {
   status: ApprovalStatus;
 }
 
-/** 审批操作（业务规则单点：状态流转合法性校验在核心层） */
+/**
+ * 审批操作（业务规则单点：状态流转合法性校验在核心层）.
+ * 传输走 requestApi → 各端注入的 ApiPort（token 附加 / 401 单飞 refresh / 基址由端注入），
+ * 不得裸 fetch（缺 baseUrl/token 会 native 失败 + 401）。
+ */
 export function useApproval() {
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,12 +24,11 @@ export function useApproval() {
       const { notifier } = getAdapters();
       setSubmitting(true);
       try {
-        const res = await fetch(`/api/approvals/${approvalId}/${action}`, {
+        await requestApi(`/api/approvals/${approvalId}/${action}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ comment }),
         });
-        if (!res.ok) throw new Error(`审批失败 HTTP ${res.status}`);
         notifier.success(action === 'approve' ? '已通过' : '已驳回');
         return true;
       } catch (e) {
