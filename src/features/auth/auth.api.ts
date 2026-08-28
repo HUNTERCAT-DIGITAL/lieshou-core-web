@@ -16,7 +16,9 @@ export async function login(req: LoginRequest): Promise<TokenResponse> {
     });
   } catch (e) {
     if (e instanceof AuthError) throw e;
-    throw new AuthError('INVALID_CREDENTIALS', e instanceof Error ? e.message : String(e));
+    // 网络/传输层错误（ApiError 等）：透传原样，不伪装成「密码错误」——
+    // INVALID_CREDENTIALS 只应由后端明确的 401 凭据错误产生（避免掩盖 CORS/网络问题）
+    throw e;
   }
 }
 
