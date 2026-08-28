@@ -18,3 +18,5 @@ export * from './features/auth/auth.store';
 export * from './features/workbench/useWorkbench';
 export * from './features/approval/approval.api';
 export * from './features/approval/useApproval';
+export * from './features/contact/contact.api';
+export * from './features/contract/contract.api';
