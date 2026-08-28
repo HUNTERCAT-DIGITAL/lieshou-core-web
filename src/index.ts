@@ -27,6 +27,7 @@ export * from './features/audit/audit.api';
 export * from './features/role/role.api';
 export * from './features/tenant/tenant.api';
 export * from './features/user/user.api';
+export * from './features/user/userDisplayName';
 export * from './features/crm/crm.api';
 export * from './features/customer-success/customerSuccess.api';
 export * from './features/dispatch/dispatch.api';
