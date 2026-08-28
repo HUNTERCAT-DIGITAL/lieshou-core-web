@@ -7,6 +7,7 @@
  * 注：使用 export *（无 type-only 语法）以兼容 Taro 4 的 babel-preset-taro。
  */
 export * from './config/provider';
+export * from './config/editions';
 export * from './ports/storage.port';
 export * from './ports/notifier.port';
 export * from './ports/navigation.port';
