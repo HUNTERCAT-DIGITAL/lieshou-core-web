@@ -12,6 +12,8 @@ export * from './ports/storage.port';
 export * from './ports/notifier.port';
 export * from './ports/navigation.port';
 export * from './ports/api.port';
+export * from './hooks/responsive';
+export { useResponsive } from './hooks/useResponsive';
 export * from './features/auth/auth.api';
 export * from './features/auth/useAuth';
 export * from './features/auth/auth.store';
