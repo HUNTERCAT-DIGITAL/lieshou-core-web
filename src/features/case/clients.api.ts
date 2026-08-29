@@ -7,9 +7,16 @@ import { requestApi } from '../../config/provider';
 import type {
   ClientRequest,
   ClientSuccessSummary,
+  ClientValueRecord,
   ClientValueType,
   LegalClient,
 } from '@lieshoucloud/contract-types/business/legal';
+
+/** 价值记录请求（契约未单列,本地定义:valueType 取值见契约 ClientValueType） */
+export interface ClientValueRequest {
+  valueType: ClientValueType;
+  description: string;
+}
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -68,20 +75,4 @@ export async function addClientValue(id: number, body: ClientValueRequest): Prom
 /** PUT /api/legal/client-values/{id}/confirm — 确认价值记录 */
 export async function confirmClientValue(id: number): Promise<ClientValueRecord> {
   return requestApi<ClientValueRecord>(`/api/legal/client-values/${id}/confirm`, { method: 'PUT' });
-}
-
-/** 价值记录（契约扩充：valueType 取值见 ClientValueType） */
-export interface ClientValueRecord {
-  id: number;
-  tenantId: number;
-  clientId: number;
-  valueType: ClientValueType;
-  description: string;
-  confirmed: boolean;
-  createdAt?: string;
-}
-
-export interface ClientValueRequest {
-  valueType: ClientValueType;
-  description: string;
 }
