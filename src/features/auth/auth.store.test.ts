@@ -19,7 +19,12 @@ vi.mock('./auth.api', () => ({
   switchTenant: vi.fn(),
 }));
 
-import { fetchCurrentUser, login as loginApi, switchTenant as switchTenantApi } from './auth.api';
+import {
+  fetchCurrentUser,
+  login as loginApi,
+  refreshTokens as refreshTokensApi,
+  switchTenant as switchTenantApi,
+} from './auth.api';
 
 function createMemoryStorage() {
   const map = new Map<string, string>();
@@ -145,5 +150,74 @@ describe('switchTenant', () => {
     expect(s.user?.tenantName).toBe('租户二');
     expect(s.user?.roles).toEqual(['USER']);
     expect(fetchCurrentUser).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('refresh', () => {
+  it('刷新成功：更新 accessToken/refreshToken', async () => {
+    useAuthStore.setState({
+      accessToken: 'at-old',
+      refreshToken: 'rt-1',
+      user: realUser,
+      isAuthenticated: true,
+      availableTenants: [],
+    });
+    vi.mocked(refreshTokensApi).mockResolvedValue({ ...token, accessToken: 'at-new', refreshToken: 'rt-new' });
+
+    await useAuthStore.getState().refresh();
+
+    const s = useAuthStore.getState();
+    expect(s.accessToken).toBe('at-new');
+    expect(s.refreshToken).toBe('rt-new');
+    expect(refreshTokensApi).toHaveBeenCalledWith('rt-1');
+  });
+
+  it('无 refreshToken → 抛 AuthError，不调接口', async () => {
+    useAuthStore.setState({ accessToken: 'at', refreshToken: null, isAuthenticated: true });
+
+    await expect(useAuthStore.getState().refresh()).rejects.toThrow('not logged in');
+    expect(refreshTokensApi).not.toHaveBeenCalled();
+  });
+
+  it('刷新失败（refresh token 失效）→ 抛错且不清会话（由调用方决定登出）', async () => {
+    useAuthStore.setState({ accessToken: 'at', refreshToken: 'rt-dead', isAuthenticated: true });
+    vi.mocked(refreshTokensApi).mockRejectedValue(new Error('INVALID_REFRESH_TOKEN'));
+
+    await expect(useAuthStore.getState().refresh()).rejects.toThrow('INVALID_REFRESH_TOKEN');
+    const s = useAuthStore.getState();
+    expect(s.isAuthenticated).toBe(true);
+    expect(s.accessToken).toBe('at');
+  });
+});
+
+describe('会话持久化恢复（rehydrate）', () => {
+  it('端口注入后显式 rehydrate：从 storage 恢复 isAuthenticated/accessToken/user', async () => {
+    // 模拟已持久化的会话（zustand persist 格式：{ state, version }）
+    const persisted = JSON.stringify({
+      state: {
+        accessToken: 'at-restored',
+        refreshToken: 'rt-restored',
+        user: realUser,
+        isAuthenticated: true,
+        availableTenants: token.availableTenants,
+      },
+      version: 0,
+    });
+    storage._map.set('lieshoucloud:auth', persisted);
+
+    useAuthStore.persist.rehydrate();
+
+    const s = useAuthStore.getState();
+    expect(s.isAuthenticated).toBe(true);
+    expect(s.accessToken).toBe('at-restored');
+    expect(s.refreshToken).toBe('rt-restored');
+    expect(s.user?.username).toBe('alice');
+  });
+
+  it('无持久化数据 → rehydrate 后保持未登录', () => {
+    useAuthStore.persist.rehydrate();
+    const s = useAuthStore.getState();
+    expect(s.isAuthenticated).toBe(false);
+    expect(s.accessToken).toBeNull();
   });
 });
