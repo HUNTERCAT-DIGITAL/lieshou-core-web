@@ -14,6 +14,7 @@ export * from './ports/navigation.port';
 export * from './ports/api.port';
 export * from './hooks/responsive';
 export { useResponsive } from './hooks/useResponsive';
+export { useI18n } from './hooks/useI18n';
 export * from './features/auth/auth.api';
 export * from './features/auth/useAuth';
 export * from './features/auth/auth.store';
