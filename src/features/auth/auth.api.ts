@@ -107,19 +107,13 @@ export async function register(req: {
 }
 
 /** POST /api/auth/reset-password - 忘记密码 */
-/** POST /api/auth/activate - 首次登录激活(管理员建用户未设密码,验证码 + 设置密码 · 2026-08) */
-export async function activate(
-  channel: CodeChannel,
-  target: string,
-  code: string,
-  password: string,
-): Promise<TokenResponse> {
+/** POST /api/auth/activate - 首次登录激活(管理员建用户未设密码 · 2026-08)
+ *  登录后(token 即身份)直接设置密码,无需再次验证码;带 Authorization */
+export async function activate(password: string): Promise<TokenResponse> {
   return requestApi<TokenResponse>('/api/auth/activate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ channel, target, code, password }),
-    // @ts-expect-error 同上
-    skipAuth401: true,
+    body: JSON.stringify({ password }),
   });
 }
 
