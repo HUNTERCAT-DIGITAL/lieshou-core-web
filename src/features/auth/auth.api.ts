@@ -118,6 +118,7 @@ export async function activate(password: string): Promise<TokenResponse> {
 }
 
 export async function resetPassword(
+  tenantCode: string | undefined,
   channel: CodeChannel,
   target: string,
   code: string,
@@ -126,7 +127,7 @@ export async function resetPassword(
   return requestApi<void>('/api/auth/reset-password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ channel, target, code, newPassword }),
+    body: JSON.stringify({ tenantCode, channel, target, code, newPassword }),
   });
 }
 
