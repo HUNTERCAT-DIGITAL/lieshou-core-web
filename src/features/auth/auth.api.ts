@@ -55,7 +55,7 @@ export async function switchTenant(refreshToken: string, tenantCode: string): Pr
 // ============================================================
 
 export type CodeChannel = 'SMS' | 'EMAIL';
-export type CodePurpose = 'LOGIN' | 'REGISTER' | 'RESET_PASSWORD';
+export type CodePurpose = 'LOGIN' | 'REGISTER' | 'RESET_PASSWORD' | 'ACTIVATE';
 
 /** POST /api/auth/send-code */
 export async function sendCode(
@@ -107,6 +107,22 @@ export async function register(req: {
 }
 
 /** POST /api/auth/reset-password - 忘记密码 */
+/** POST /api/auth/activate - 首次登录激活(管理员建用户未设密码,验证码 + 设置密码 · 2026-08) */
+export async function activate(
+  channel: CodeChannel,
+  target: string,
+  code: string,
+  password: string,
+): Promise<TokenResponse> {
+  return requestApi<TokenResponse>('/api/auth/activate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channel, target, code, password }),
+    // @ts-expect-error 同上
+    skipAuth401: true,
+  });
+}
+
 export async function resetPassword(
   channel: CodeChannel,
   target: string,
