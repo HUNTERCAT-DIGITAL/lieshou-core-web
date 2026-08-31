@@ -32,15 +32,13 @@ export interface OrgTreeState {
   companies: Organization[];
   /** 部门（二级） */
   departments: Organization[];
-  /** 按子公司聚合的项目数（由调用方传入 summary.byOrg） */
+  /** 按子公司聚合的项目数由调用方加载后传入渲染层（本项目 hook 不耦合项目服务） */
 }
 
 /**
  * 组织树数据 hook：加载组织 + 人员统计，暴露派生数据与 CRUD 操作。
- *
- * @param options.byOrg 可选：子公司 → 项目数聚合（Record<orgId, count>，来自项目 summary）
  */
-export function useOrgTree(options?: { byOrg?: Record<string, number> }) {
+export function useOrgTree() {
   const { notifier } = getAdapters();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [staff, setStaff] = useState<OrgStaffStats[]>([]);
