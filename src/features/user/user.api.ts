@@ -48,6 +48,24 @@ export async function updateUser(id: number, body: UpdateUserRequest): Promise<U
   });
 }
 
+/**
+ * 上传用户头像（multipart file → 后端存储 → 更新 avatarUrl）.
+ * 2026-09 头像功能：走注入传输端口（同 createUser 模式）。
+ */
+export async function updateUserAvatar(id: number, file: File): Promise<User> {
+  const fd = new FormData();
+  fd.append('file', file);
+  return requestApi<User>(`/api/users/${id}/avatar`, {
+    method: 'POST',
+    body: fd,
+  });
+}
+
+/** 清除用户头像（avatarUrl 置空） */
+export async function removeUserAvatar(id: number): Promise<User> {
+  return requestApi<User>(`/api/users/${id}/avatar`, { method: 'DELETE' });
+}
+
 /** DELETE /api/users/{id} */
 export async function deleteUser(id: number): Promise<void> {
   return requestApi<void>(`/api/users/${id}`, { method: 'DELETE' });
