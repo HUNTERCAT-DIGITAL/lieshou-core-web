@@ -66,6 +66,15 @@ export async function removeUserAvatar(id: number): Promise<User> {
   return requestApi<User>(`/api/users/${id}/avatar`, { method: 'DELETE' });
 }
 
+/** 直接设置头像 URL（默认头像 data URL · 2026-09） */
+export async function setUserAvatarUrl(id: number, avatarUrl: string): Promise<User> {
+  return requestApi<User>(`/api/users/${id}/avatar-url`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ avatarUrl }),
+  });
+}
+
 /** DELETE /api/users/{id} */
 export async function deleteUser(id: number): Promise<void> {
   return requestApi<void>(`/api/users/${id}`, { method: 'DELETE' });
