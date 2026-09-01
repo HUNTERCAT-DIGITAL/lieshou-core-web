@@ -25,10 +25,13 @@ export async function login(req: LoginRequest): Promise<TokenResponse> {
 /** 刷新 token */
 export async function refreshTokens(refreshToken: string): Promise<TokenResponse> {
   try {
+    // skipAuth401：refresh 自身 401 = 凭据已失效，直接抛错（否则传输层 401 拦截会递归调 refresh 死循环）
     return await requestApi<TokenResponse>('/api/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
+      // @ts-expect-error core-web 不直接依赖 contract-api 的 RequestInit 扩展,由各端 ApiPort 透传
+      skipAuth401: true,
     });
   } catch (e) {
     if (e instanceof AuthError) throw e;
@@ -43,10 +46,13 @@ export async function fetchCurrentUser(): Promise<CurrentUser> {
 
 /** 切换租户 */
 export async function switchTenant(refreshToken: string, tenantCode: string): Promise<TokenResponse> {
+  // skipAuth401：refreshToken 失效时直接抛错，避免传输层 401 拦截递归（同 refresh）
   return requestApi<TokenResponse>('/api/auth/switch-tenant', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken, tenantCode }),
+    // @ts-expect-error core-web 不直接依赖 contract-api 的 RequestInit 扩展,由各端 ApiPort 透传
+    skipAuth401: true,
   });
 }
 
